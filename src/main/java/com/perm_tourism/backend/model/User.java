@@ -3,6 +3,7 @@ package com.perm_tourism.backend.model;
 import com.perm_tourism.backend.enums.Gender;
 import lombok.Data;
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -30,7 +31,7 @@ public class User {
     private Gender gender = Gender.NOT_SPECIFIED;
 
     @Column(name = "birthday_date")
-    private LocalDateTime birthdayDate;
+    private LocalDate birthdayDate;
 
     @Column(name = "access_level")
     private Integer accessLevel = 1; // 1 - обычный пользователь, 2 - модератор, 3 - админ
