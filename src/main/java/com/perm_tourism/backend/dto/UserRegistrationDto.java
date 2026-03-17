@@ -8,7 +8,6 @@ import java.time.LocalDate;
 
 @Data
 public class UserRegistrationDto {
-
     @Pattern(regexp = "^[a-zA-Zа-яА-Я\\s-]+$", message = "Имя пользователя может содержать только буквы, пробелы и дефисы")
     @NotBlank(message = "Имя пользователя обязательно")
     @Size(min = 2, max = 100, message = "Имя пользователя должно быть от 2 до 100 символов")
@@ -29,6 +28,7 @@ public class UserRegistrationDto {
     @NotNull(message = "Дата рождения обязательна")
     @Past(message = "Указана некорректная дата рождения")
     private LocalDate birthdayDate;
+
 
     @NotNull(message = "Необходимо принять условия политики конфиденциальности")
     @AssertTrue(message = "Вы должны принять условия политики конфиденциальности")
