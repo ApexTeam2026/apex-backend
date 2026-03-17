@@ -8,7 +8,6 @@ import java.time.LocalDate;
 
 @Data
 public class UserRegistrationDto {
-
     @Pattern(regexp = "^[a-zA-Zа-яА-Я\\s-]+$", message = "Имя пользователя может содержать только буквы, пробелы и дефисы")
     @NotBlank(message = "Имя пользователя обязательно")
     @Size(min = 2, max = 100, message = "Имя пользователя должно быть от 2 до 100 символов")
