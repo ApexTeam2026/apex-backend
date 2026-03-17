@@ -30,7 +30,6 @@ public class UserRegistrationDto {
     @Past(message = "Указана некорректная дата рождения")
     private LocalDate birthdayDate;
 
-
     @NotNull(message = "Необходимо принять условия политики конфиденциальности")
     @AssertTrue(message = "Вы должны принять условия политики конфиденциальности")
     private Boolean privacyPolicyAccepted;
