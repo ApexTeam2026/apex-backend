@@ -47,7 +47,7 @@ public class User {
     private LocalDateTime updatedAt;
 
     @Column(name = "deleted_at")
-    private LocalDateTime deletedAt; // для мягкого удаления
+    private LocalDateTime deletedAt;
 
     @PrePersist
     protected void onCreate() {
