@@ -8,7 +8,7 @@ import java.time.LocalDate;
 public class UserRegistrationDto {
 
     @NotBlank(message = "Имя пользователя обязательно")
-    @Size(min = 3, max = 50, message = "Имя пользователя должно быть от 2 до 100 символов")
+    @Size(min = 3, max = 100, message = "Имя пользователя должно быть от 3 до 100 символов")
     private String name;
 
     @NotBlank(message = "Email обязателен")
