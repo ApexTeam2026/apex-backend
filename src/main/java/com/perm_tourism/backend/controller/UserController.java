@@ -28,6 +28,16 @@ public class UserController {
         }
     }
 
+    // Обновление данных пользователя
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponseDto> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UserRegistrationDto dto) {
+        return userService.updateUser(id, dto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     // Получение пользователя по ID
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
