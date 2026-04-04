@@ -39,7 +39,6 @@ public class User {
     @Column(name = "auth_key", length = 500)
     private String authKey;
 
-
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

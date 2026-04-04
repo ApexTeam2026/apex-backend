@@ -1,10 +1,13 @@
 package com.perm_tourism.backend.service.impl;
 
+import com.perm_tourism.backend.dto.LoginRequestDto;
+import com.perm_tourism.backend.dto.LoginResponseDto;
 import com.perm_tourism.backend.dto.UserRegistrationDto;
 import com.perm_tourism.backend.dto.UserResponseDto;
 import com.perm_tourism.backend.model.User;
 import com.perm_tourism.backend.repository.UserRepository;
 import com.perm_tourism.backend.service.UserService;
+import com.perm_tourism.backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     @Override
     public UserResponseDto register(UserRegistrationDto dto) {
@@ -75,6 +79,24 @@ public class UserServiceImpl implements UserService {
                     return true;
                 })
                 .orElse(false);
+    }
+
+    @Override
+    public LoginResponseDto login(LoginRequestDto request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Неверный пароль");
+        }
+
+        String token = jwtUtil.generateToken(user.getEmail());
+
+        user.setAccessToken(token);
+        user.setAuthKey(token);
+        userRepository.save(user);
+
+        return new LoginResponseDto(token, token);
     }
 
     // Преобразование User -> UserResponseDto

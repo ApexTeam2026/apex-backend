@@ -1,5 +1,7 @@
 package com.perm_tourism.backend.service;
 
+import com.perm_tourism.backend.dto.LoginRequestDto;
+import com.perm_tourism.backend.dto.LoginResponseDto;
 import com.perm_tourism.backend.dto.UserRegistrationDto;
 import com.perm_tourism.backend.dto.UserResponseDto;
 import java.util.List;
@@ -15,4 +17,6 @@ public interface UserService {
     Optional<UserResponseDto> updateUser(Long id, UserRegistrationDto dto); // Обновить данные пользователя
 
     boolean deleteUser(Long id); // Удалить пользователя
+
+    LoginResponseDto login(LoginRequestDto request);
 }
