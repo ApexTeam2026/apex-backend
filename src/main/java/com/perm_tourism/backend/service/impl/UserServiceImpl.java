@@ -6,6 +6,7 @@ import com.perm_tourism.backend.model.User;
 import com.perm_tourism.backend.repository.UserRepository;
 import com.perm_tourism.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserResponseDto register(UserRegistrationDto dto) {
@@ -27,7 +29,7 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword()); // TODO: добавить хеширование
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setBirthdayDate(dto.getBirthdayDate());
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
