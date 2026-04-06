@@ -16,6 +16,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
+                        // Разрешаем доступ к Swagger без авторизации (через AntPathRequestMatcher)
+                        .antMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/webjars/**").permitAll()
+                        // Все остальные запросы требуют авторизации
                         .anyRequest().authenticated()
                 )
                 .httpBasic();
