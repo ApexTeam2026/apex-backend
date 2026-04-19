@@ -87,5 +87,11 @@ public class Place {
 
 //    @Column(name = "family_friendly")
 //    private Boolean familyFrinedly;
+
+
+  // Ссылки на фотографии
+  @Column(name = "photos", columnDefinition = "TEXT")
+  private String photos; //JSON-строка: ["url1", "url2", "url3"]
+
 }
 
