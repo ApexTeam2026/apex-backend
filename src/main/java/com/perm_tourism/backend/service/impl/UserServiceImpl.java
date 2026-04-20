@@ -70,7 +70,7 @@ public class UserServiceImpl implements UserService {
 
             // Обновляем email (с проверкой уникальности)
             if (dto.getEmail() != null && !dto.getEmail().equals(user.getEmail())) {
-              if (userRepository.existsByEmailAndIdNot(dto.getEmail(), id)) {
+                if (userRepository.existsByEmailAndUserIdNot(dto.getEmail(), id)) {
                 throw new RuntimeException("Пользователь с таким email уже существует");
               }
               user.setEmail(dto.getEmail());
