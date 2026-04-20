@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<UserResponseDto> getUserById(Long id) {
       // Ищем только активных пользователей (не удалённых)
-      return userRepository.findByIdAndDeletedAtIsNull(id)
+        return userRepository.findByUserIDAndDeletedAtIsNull(id)
           .map(this::mapToResponseDto);
     }
 
@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<UserResponseDto> updateUser(Long id, UserRegistrationDto dto) {
       // Ищем только активного пользователя
-      return userRepository.findByIdAndDeletedAtIsNull(id)
+        return userRepository.findByUserIDAndDeletedAtIsNull(id)
           .map(user -> {
             // Обновляем имя (если передано)
             if (dto.getName() != null && !dto.getName().isEmpty()) {
@@ -99,7 +99,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean deleteUser(Long id) {
       // Ищем только активного пользователя
-      return userRepository.findByIdAndDeletedAtIsNull(id)
+        return userRepository.findByUserIDAndDeletedAtIsNull(id)
           .map(user -> {
             user.setDeletedAt(LocalDateTime.now());
             userRepository.save(user);

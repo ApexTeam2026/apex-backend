@@ -12,7 +12,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email); // Проверка, существует ли пользователь с таким email
 
   // Поиск только активных пользователей (не удалённых)
-  Optional<User> findByIdAndDeletedAtIsNull(Long id);
+  Optional<User> findByUserIDAndDeletedAtIsNull(Long userID);
 
   // Поиск всех активных пользователей
   List<User> findAllByDeletedAtIsNull();
