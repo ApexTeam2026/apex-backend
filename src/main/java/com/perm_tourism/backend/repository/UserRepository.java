@@ -18,7 +18,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
   List<User> findAllByDeletedAtIsNull();
 
   // Проверка существования email у другого пользователя (для обновления)
-  boolean existsByEmailAndUserIdNot(String email, Long userId);
+  boolean existsByEmailAndUserIDNot(String email, Long userID);
 
   // Поиск активного пользователя по email (не удалён)
   Optional<User> findByEmailAndDeletedAtIsNull(String email);
