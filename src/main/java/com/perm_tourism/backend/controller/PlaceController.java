@@ -27,7 +27,7 @@ public class PlaceController {
 
       // Создаём новое место
       Place place = new Place();
-      place.setExternalId(null); // пока нет externalId
+      place.setExternalId(dto.getExternalId());
       place.setName(dto.getName());
       place.setDescription(dto.getDescription());
       place.setCoordinates(dto.getCoordinates());

@@ -7,9 +7,10 @@ import java.util.List;
 @Data
 public class PlaceDto {
   private Long id; // из placeId
+  private String externalId;
   private String name;
   private String description;
-  private String coordinates; // широта,долгота
+  private String coordinates; // Широта, долгота
   private String address;
   private List<String> tags;
   private String category;

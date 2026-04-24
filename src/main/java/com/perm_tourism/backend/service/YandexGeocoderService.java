@@ -35,6 +35,7 @@ public class YandexGeocoderService {
           .path("GeoObject");
 
       // Извлекаем данные
+      String externalId = geoObject.path("id").asText();
       String name = geoObject.path("name").asText();
       String description = geoObject.path("description").asText();
       String addressText = geoObject.path("boundedBy")
@@ -44,11 +45,12 @@ public class YandexGeocoderService {
       // Координаты от Яндекса приходят как "долгота широта"
       String pos = geoObject.path("Point").path("pos").asText();
       String[] coords = pos.split(" ");
-      String coordinates = coords[1] + "," + coords[0]; // "широта,долгота"
+      String coordinates = coords[1] + "," + coords[0]; // Широта, долгота
 
       // Заполняем DTO
       PlaceDto dto = new PlaceDto();
       dto.setId(null); // ID будет присвоен при сохранении в БД
+      dto.setExternalId(externalId);
       dto.setName(name);
       dto.setDescription(description);
       dto.setAddress(addressText);
@@ -71,5 +73,4 @@ public class YandexGeocoderService {
       throw new RuntimeException("Ошибка при парсинге ответа Яндекс API:" + e.getMessage());
     }
   }
-
 }
