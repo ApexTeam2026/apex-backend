@@ -5,11 +5,13 @@ import com.perm_tourism.backend.model.Place;
 import com.perm_tourism.backend.repository.PlaceRepository;
 import com.perm_tourism.backend.service.YandexGeocoderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/places")
@@ -17,6 +19,41 @@ import java.util.Collections;
 public class PlaceController {
   private final YandexGeocoderService yandexGeocoderService;
   private final PlaceRepository placeRepository;
+
+    // Получение всех мест (с фильтрацией и сортировкой)
+    @GetMapping
+    public ResponseEntity<List<Place>> getAllPlaces(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String tag,
+            @RequestParam(required = false) String district,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        Sort.Direction direction = Sort.Direction.fromString(sortDir);
+        Sort sort = Sort.by(direction, sortBy);
+
+        List<Place> places;
+
+        if (category != null && !category.isEmpty()) {
+            places = placeRepository.findByCategory(category, sort);
+        } else if (tag != null && !tag.isEmpty()) {
+            places = placeRepository.findByTag(tag, sort);
+        } else if (district != null && !district.isEmpty()) {
+            places = placeRepository.findByDistrict(district, sort);
+        } else {
+            places = placeRepository.findAll(sort);
+        }
+
+        return ResponseEntity.ok(places);
+    }
+
+    // Получение места по ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Place> getPlaceById(@PathVariable Long id) {
+        return placeRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
   // Добавление места по адресу (через Яндекс API)
   @PostMapping("/add-by-address")

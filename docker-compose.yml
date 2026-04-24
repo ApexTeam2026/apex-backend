@@ -31,6 +31,7 @@ services:
       SPRING_DATASOURCE_USERNAME: appuser
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      YANDEX_API_KEY: 087552d4-1cd3-48a6-a668-9d0b58073a44
 
     depends_on:
       postgres:

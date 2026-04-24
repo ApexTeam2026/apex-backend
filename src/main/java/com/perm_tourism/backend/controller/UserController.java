@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -19,23 +20,27 @@ public class UserController {
 
     // Регистрация пользователя
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDto> register (@Valid @RequestBody UserRegistrationDto dto) {
+    public ResponseEntity<?> register (@Valid @RequestBody UserRegistrationDto dto) {
         try {
             UserResponseDto registeredUser = userService.register(dto);
             return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
         } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Пользователь с таким email уже существует
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); // Пользователь с таким email уже существует
         }
     }
 
     // Обновление данных пользователя
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDto> updateUser(
+    public ResponseEntity<?> updateUser(
             @PathVariable Long id,
             @Valid @RequestBody UserRegistrationDto dto) {
+      try {
         return userService.updateUser(id, dto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+      } catch (RuntimeException e) {
+        return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+      }
     }
 
     // Получение пользователя по ID

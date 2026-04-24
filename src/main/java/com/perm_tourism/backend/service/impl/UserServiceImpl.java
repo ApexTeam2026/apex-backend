@@ -45,46 +45,74 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<UserResponseDto> getUserById(Long id) {
-        return userRepository.findById(id)
-                .map(this::mapToResponseDto);
+      // Ищем только активных пользователей (не удалённых)
+        return userRepository.findByUserIDAndDeletedAtIsNull(id)
+          .map(this::mapToResponseDto);
     }
 
     @Override
     public List<UserResponseDto> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(this::mapToResponseDto)
-                .collect(Collectors.toList());
+      // Получаем только активных пользователей
+      return userRepository.findAllByDeletedAtIsNull().stream()
+          .map(this::mapToResponseDto)
+          .collect(Collectors.toList());
     }
 
     @Override
     public Optional<UserResponseDto> updateUser(Long id, UserRegistrationDto dto) {
-        return userRepository.findById(id)
-                .map(user -> {
-                    user.setName(dto.getName());
-                    user.setEmail(dto.getEmail());
-                    user.setBirthdayDate(dto.getBirthdayDate());
-                    user.setUpdatedAt(LocalDateTime.now());
-                    // TODO: отдельный метод для смены пароля с подтверждением и хешированием
-                    return userRepository.save(user);
-                })
-                .map(this::mapToResponseDto);
+      // Ищем только активного пользователя
+        return userRepository.findByUserIDAndDeletedAtIsNull(id)
+          .map(user -> {
+            // Обновляем имя (если передано)
+            if (dto.getName() != null && !dto.getName().isEmpty()) {
+              user.setName(dto.getName());
+            }
+
+            // Обновляем email (с проверкой уникальности)
+            if (dto.getEmail() != null && !dto.getEmail().equals(user.getEmail())) {
+                if (userRepository.existsByEmailAndUserIDNot(dto.getEmail(), id)) {
+                throw new RuntimeException("Пользователь с таким email уже существует");
+              }
+              user.setEmail(dto.getEmail());
+            }
+
+            // Обновляем дату рождения (если передана)
+            if (dto.getBirthdayDate() != null) {
+              user.setBirthdayDate(dto.getBirthdayDate());
+            }
+
+            // Обновляем пароль (только если передан не пустой и отличается от текущего)
+            // TODO: отдельный метод для смены пароля с подтверждением
+            if (dto.getPassword() != null && !dto.getPassword().trim().isEmpty()) {
+              if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+                user.setPassword(passwordEncoder.encode(dto.getPassword()));
+              }
+            }
+
+            user.setUpdatedAt(LocalDateTime.now());
+
+            return userRepository.save(user);
+          })
+          .map(this::mapToResponseDto);
     }
 
     @Override
     public boolean deleteUser(Long id) {
-        return userRepository.findById(id)
-                .map(user -> {
-                    user.setDeletedAt(LocalDateTime.now());
-                    userRepository.save(user);
-                    return true;
-                })
-                .orElse(false);
+      // Ищем только активного пользователя
+        return userRepository.findByUserIDAndDeletedAtIsNull(id)
+          .map(user -> {
+            user.setDeletedAt(LocalDateTime.now());
+            userRepository.save(user);
+            return true;
+          })
+          .orElse(false);
     }
 
     @Override
     public LoginResponseDto login(LoginRequestDto request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+      // При логине также проверяем, что пользователь не удалён
+      User user = userRepository.findByEmailAndDeletedAtIsNull(request.getEmail())
+          .orElseThrow(() -> new RuntimeException("Пользователь не найден или удалён"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Неверный пароль");
