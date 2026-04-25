@@ -36,6 +36,8 @@ public class YandexGeocoderService {
 
       // Извлекаем данные
       String externalId = geoObject.path("id").asText();
+      System.out.println("DEBUG: externalId from Yandex = " + externalId);
+
       String name = geoObject.path("name").asText();
       String description = geoObject.path("description").asText();
       String addressText = geoObject.path("boundedBy")
