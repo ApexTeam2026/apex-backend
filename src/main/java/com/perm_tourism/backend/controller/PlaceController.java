@@ -64,7 +64,11 @@ public class PlaceController {
 
       // Создаём новое место
       Place place = new Place();
-      place.setExternalId(dto.getExternalId());
+      String externalId = dto.getExternalId();
+      if (externalId == null || externalId.isEmpty()) {
+        externalId = "yandex_fallback_" + java.util.UUID.randomUUID();
+      }
+      place.setExternalId(externalId);
       place.setName(dto.getName());
       place.setDescription(dto.getDescription());
       place.setCoordinates(dto.getCoordinates());
