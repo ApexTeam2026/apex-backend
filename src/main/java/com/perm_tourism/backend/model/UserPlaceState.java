@@ -21,11 +21,13 @@ public class UserPlaceState {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "user_id", nullable = false)
-  private Long userId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 
-  @Column(name = "place_id", nullable = false)
-  private Long placeId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "place_id", nullable = false)
+  private Place place;
 
   @Column(name = "is_favorite", nullable = false)
   private Boolean isFavorite = false;
