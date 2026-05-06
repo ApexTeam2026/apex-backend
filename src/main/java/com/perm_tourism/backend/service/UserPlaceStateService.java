@@ -19,93 +19,92 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserPlaceStateService {
-  private final UserPlaceStateRepository stateRepository;
-  private final UserRepository userRepository;
-  private final PlaceRepository placeRepository;
+    private final UserPlaceStateRepository stateRepository;
+    private final UserRepository userRepository;
+    private final PlaceRepository placeRepository;
 
-  @Transactional
-  public UserPlaceStateResponseDto setFavorite(UserPlaceStateRequestDto dto) {
-    User user = userRepository.findById(dto.getUserId())
-      .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+    @Transactional
+    public UserPlaceStateResponseDto setFavorite(UserPlaceStateRequestDto dto) {
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 
-    Place place = placeRepository.findById(dto.getPlaceId())
-      .orElseThrow(() -> new RuntimeException("Место не найдено"));
+        Place place = placeRepository.findById(dto.getPlaceId())
+                .orElseThrow(() -> new RuntimeException("Место не найдено"));
 
-    UserPlaceState state = stateRepository.findByUserIdAndPlaceId(dto.getUserId(), dto.getPlaceId())
-      .orElse(new UserPlaceState());
+        UserPlaceState state = stateRepository.findByUserUserIDAndPlaceId(dto.getUserId(), dto.getPlaceId())
+                .orElse(new UserPlaceState());
 
-    if (state.getId() == null) {
-      state.setUser(user);
-      state.setPlace(place);
+        if (state.getId() == null) {
+            state.setUser(user);
+            state.setPlace(place);
+        }
+
+        state.setIsFavorite(dto.getIsFavorite());
+
+        if (Boolean.TRUE.equals(dto.getIsVisited())) {
+            state.setIsVisited(true);
+            state.setVisitedAt(LocalDateTime.now());
+        }
+
+        UserPlaceState saved = stateRepository.save(state);
+        return mapToResponseDto(saved);
     }
 
-    state.setIsFavorite(dto.getIsFavorite());
+    @Transactional
+    public UserPlaceStateResponseDto setVisited(UserPlaceStateRequestDto dto) {
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 
-    if (Boolean.TRUE.equals(dto.getIsVisited())) {
-      state.setIsVisited(true);
-      state.setVisitedAt(LocalDateTime.now());
+        Place place = placeRepository.findById(dto.getPlaceId())
+                .orElseThrow(() -> new RuntimeException("Место не найдено"));
+
+        UserPlaceState state = stateRepository.findByUserUserIDAndPlaceId(dto.getUserId(), dto.getPlaceId())
+                .orElse(new UserPlaceState());
+
+        if (state.getId() == null) {
+            state.setUser(user);
+            state.setPlace(place);
+        }
+
+        state.setIsVisited(dto.getIsVisited());
+        if (Boolean.TRUE.equals(dto.getIsVisited())) {
+            state.setVisitedAt(LocalDateTime.now());
+        }
+
+        if (Boolean.TRUE.equals(dto.getIsFavorite())) {
+            state.setIsFavorite(true);
+        }
+
+        UserPlaceState saved = stateRepository.save(state);
+        return mapToResponseDto(saved);
     }
 
-    UserPlaceState saved = stateRepository.save(state);
-    return mapToResponseDto(saved);
-  }
+    public List<UserPlaceStateResponseDto> getUserFavorites(Long userId) {
 
-  @Transactional
-  public UserPlaceStateResponseDto setVisited(UserPlaceStateRequestDto dto) {
-    User user = userRepository.findById(dto.getUserId())
-      .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
-
-    Place place = placeRepository.findById(dto.getPlaceId())
-      .orElseThrow(() -> new RuntimeException("Место не найдено"));
-
-    UserPlaceState state = stateRepository
-      .findByUserIdAndPlaceId(dto.getUserId(), dto.getPlaceId())
-      .orElse(new UserPlaceState());
-
-    if (state.getId() == null) {
-      state.setUser(user);
-      state.setPlace(place);
+        return stateRepository.findByUserUserIDAndIsFavoriteTrue(userId)
+                .stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
     }
 
-    state.setIsVisited(dto.getIsVisited());
-    if (Boolean.TRUE.equals(dto.getIsVisited())) {
-      state.setVisitedAt(LocalDateTime.now());
+    public List<UserPlaceStateResponseDto> getUserVisited(Long userId) {
+
+        return stateRepository.findByUserUserIDAndIsVisitedTrue(userId)
+                .stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
     }
 
-    if (Boolean.TRUE.equals(dto.getIsFavorite())) {
-      state.setIsFavorite(true);
+    private UserPlaceStateResponseDto mapToResponseDto(UserPlaceState state) {
+        UserPlaceStateResponseDto dto = new UserPlaceStateResponseDto();
+        dto.setId(state.getId());
+        dto.setUserId(state.getUser().getUserID());
+        dto.setUserName(state.getUser().getName());
+        dto.setPlaceId(state.getPlace().getPlaceId());
+        dto.setPlaceName(state.getPlace().getName());
+        dto.setIsFavorite(state.getIsFavorite());
+        dto.setIsVisited(state.getIsVisited());
+        dto.setVisitedAt(state.getVisitedAt());
+        return dto;
     }
-
-    UserPlaceState saved = stateRepository.save(state);
-    return mapToResponseDto(saved);
-  }
-
-  public List<UserPlaceStateResponseDto> getUserFavorites(Long userId) {
-    return stateRepository.findByUserIdAndIsFavoriteTrue(userId)
-      .stream()
-      .map(this::mapToResponseDto)
-      .collect(Collectors.toList());
-  }
-
-  public List<UserPlaceStateResponseDto> getUserVisited(Long userId) {
-    return stateRepository.findByUserIdAndIsVisitedTrue(userId)
-      .stream()
-      .map(this::mapToResponseDto)
-      .collect(Collectors.toList());
-  }
-
-  private UserPlaceStateResponseDto mapToResponseDto(UserPlaceState state) {
-    UserPlaceStateResponseDto dto = new UserPlaceStateResponseDto();
-    dto.setId(state.getId());
-    dto.setUserId(state.getUser().getUserID());
-    dto.setUserName(state.getUser().getName());
-    dto.setPlaceId(state.getPlace().getPlaceId());
-    dto.setPlaceName(state.getPlace().getName());
-    dto.setIsFavorite(state.getIsFavorite());
-    dto.setIsVisited(state.getIsVisited());
-    dto.setVisitedAt(state.getVisitedAt());
-    return dto;
-  }
 }
-
-
