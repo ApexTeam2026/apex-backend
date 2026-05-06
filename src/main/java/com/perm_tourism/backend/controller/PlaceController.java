@@ -1,18 +1,12 @@
 package com.perm_tourism.backend.controller;
 
-import com.perm_tourism.backend.dto.PlaceDto;
 import com.perm_tourism.backend.model.Place;
-import com.perm_tourism.backend.repository.PlaceRepository;
 import com.perm_tourism.backend.service.PlaceService;
-import com.perm_tourism.backend.service.YandexGeocoderService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 
 @RestController
