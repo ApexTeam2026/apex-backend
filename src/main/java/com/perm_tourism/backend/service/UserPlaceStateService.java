@@ -31,7 +31,7 @@ public class UserPlaceStateService {
         Place place = placeRepository.findById(dto.getPlaceId())
                 .orElseThrow(() -> new RuntimeException("Место не найдено"));
 
-        UserPlaceState state = stateRepository.findByUserUserIDAndPlaceId(dto.getUserId(), dto.getPlaceId())
+        UserPlaceState state = stateRepository.findByUserUserIDAndPlacePlaceId(dto.getUserId(), dto.getPlaceId())
                 .orElse(new UserPlaceState());
 
         if (state.getId() == null) {
@@ -58,7 +58,7 @@ public class UserPlaceStateService {
         Place place = placeRepository.findById(dto.getPlaceId())
                 .orElseThrow(() -> new RuntimeException("Место не найдено"));
 
-        UserPlaceState state = stateRepository.findByUserUserIDAndPlaceId(dto.getUserId(), dto.getPlaceId())
+        UserPlaceState state = stateRepository.findByUserUserIDAndPlacePlaceId(dto.getUserId(), dto.getPlaceId())
                 .orElse(new UserPlaceState());
 
         if (state.getId() == null) {

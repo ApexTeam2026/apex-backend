@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface UserPlaceStateRepository extends JpaRepository<UserPlaceState, Long> {
 
     // Поиск по user и place
-    Optional<UserPlaceState> findByUserUserIDAndPlaceId(Long userId, Long placeId);
+    Optional<UserPlaceState> findByUserUserIDAndPlacePlaceId(Long userId, Long placeId);
 
     // Поиск всех избранных мест пользователя
     List<UserPlaceState> findByUserUserIDAndIsFavoriteTrue(Long userId);
@@ -20,5 +20,5 @@ public interface UserPlaceStateRepository extends JpaRepository<UserPlaceState, 
     List<UserPlaceState> findByUserUserIDAndIsVisitedTrue(Long userId);
 
     // Проверка существования связи user + place
-    boolean existsByUserUserIDAndPlaceId(Long userId, Long placeId);
+    boolean existsByUserUserIDAndPlacePlaceId(Long userId, Long placeId);
 }
