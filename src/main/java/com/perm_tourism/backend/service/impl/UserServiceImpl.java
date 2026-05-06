@@ -81,14 +81,6 @@ public class UserServiceImpl implements UserService {
               user.setBirthdayDate(dto.getBirthdayDate());
             }
 
-            // Обновляем пароль (только если передан не пустой и отличается от текущего)
-            // TODO: отдельный метод для смены пароля с подтверждением
-            if (dto.getPassword() != null && !dto.getPassword().trim().isEmpty()) {
-              if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-                user.setPassword(passwordEncoder.encode(dto.getPassword()));
-              }
-            }
-
             user.setUpdatedAt(LocalDateTime.now());
 
             return userRepository.save(user);
@@ -127,6 +119,20 @@ public class UserServiceImpl implements UserService {
         return new LoginResponseDto(token, token);
     }
 
+    @Override
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+      User user = userRepository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+      if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+        throw new RuntimeException("Неверный старый пароль");
+      }
+
+      user.setPassword(passwordEncoder.encode(newPassword));
+      user.setUpdatedAt(LocalDateTime.now());
+      userRepository.save(user);
+    }
+
     // Преобразование User -> UserResponseDto
     private UserResponseDto mapToResponseDto(User user) {
         UserResponseDto dto = new UserResponseDto();
@@ -134,7 +140,7 @@ public class UserServiceImpl implements UserService {
         dto.setName(user.getName());
         dto.setEmail(user.getEmail());
         dto.setBirthdayDate(user.getBirthdayDate());
-        // TODO: добавить avatarUrl
+        dto.setAvatarUrl(user.getAvatarUrl());
         return dto;
     }
 }

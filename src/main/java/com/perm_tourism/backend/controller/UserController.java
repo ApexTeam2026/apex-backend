@@ -43,6 +43,19 @@ public class UserController {
       }
     }
 
+    // Смена пароля с подтверждением
+    @PostMapping("/change-password")
+    public ResponseEntity<Void> changePassword(@RequestParam Long userId,
+                                               @RequestParam String oldPassword,
+                                               @RequestParam String newPassword) {
+      try {
+        userService.changePassword(userId, oldPassword, newPassword);
+        return ResponseEntity.ok().build();
+      } catch (RuntimeException e) {
+        return ResponseEntity.badRequest().body(null);
+      }
+    }
+
     // Получение пользователя по ID
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {

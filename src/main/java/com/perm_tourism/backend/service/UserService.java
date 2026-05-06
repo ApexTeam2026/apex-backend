@@ -18,5 +18,7 @@ public interface UserService {
 
     boolean deleteUser(Long id); // Удалить пользователя
 
-    LoginResponseDto login(LoginRequestDto request);
+    LoginResponseDto login(LoginRequestDto request); // Сгенерировать токен при входе в приложение
+
+    void changePassword(Long userId, String oldPassword, String newPassword); // Метод для смены пароля с подтверждением
 }
