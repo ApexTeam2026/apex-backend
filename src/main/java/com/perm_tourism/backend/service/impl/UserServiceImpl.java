@@ -44,6 +44,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserResponseDto getCurrentUser(String token) {
+        String email = jwtUtil.extractEmail(token);
+
+        User user = userRepository.findByEmailAndDeletedAtIsNull(email)
+            .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        return mapToResponseDto(user);
+    }
+
+    @Override
     public Optional<UserResponseDto> getUserById(Long id) {
       // Ищем только активных пользователей (не удалённых)
         return userRepository.findByUserIDAndDeletedAtIsNull(id)

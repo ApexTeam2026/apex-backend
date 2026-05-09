@@ -29,6 +29,21 @@ public class UserController {
         }
     }
 
+    // Получение данных пользователя по токену
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDto> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            String token = authHeader.substring(7);
+            UserResponseDto user = userService.getCurrentUser(token);
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
     // Обновление данных пользователя
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(

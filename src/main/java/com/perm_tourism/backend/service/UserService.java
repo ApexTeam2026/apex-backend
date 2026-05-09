@@ -10,6 +10,8 @@ import java.util.Optional;
 public interface UserService {
     UserResponseDto register(UserRegistrationDto dto); // Регистрация нового пользователя
 
+    UserResponseDto getCurrentUser(String token); // Получить данные пользователя по токену
+
     Optional<UserResponseDto> getUserById(Long id); // Получить пользователя по ID
 
     List<UserResponseDto> getAllUsers(); // Получить всех пользователей (для админа)
