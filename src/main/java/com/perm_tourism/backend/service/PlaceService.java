@@ -1,6 +1,7 @@
 package com.perm_tourism.backend.service;
 
 import com.perm_tourism.backend.dto.PlaceDto;
+import com.perm_tourism.backend.dto.PlaceUpdateDto;
 import com.perm_tourism.backend.model.Place;
 import com.perm_tourism.backend.repository.PlaceRepository;
 import lombok.RequiredArgsConstructor;
@@ -60,9 +61,31 @@ public class PlaceService {
     place.setAverageCheck(null);
     place.setDistrict("");
     place.setWorkingHours("");
-    place.setWedsite("");
+    place.setWebsite("");
     place.setSuitableFor(Collections.emptyList());
     place.setTimeOfDay(Collections.emptyList());
+
+    return placeRepository.save(place);
+  }
+
+  public Place updatePlace(Long id, PlaceUpdateDto dto) {
+    Place place = placeRepository.findById(id)
+      .orElseThrow(() -> new RuntimeException("Place not found: " + id));
+
+    if (dto.getName() != null) place.setName(dto.getName());
+    if (dto.getDescription() != null) place.setDescription(dto.getDescription());
+    if (dto.getCoordinates() != null) place.setCoordinates(dto.getCoordinates());
+    if (dto.getAddress() != null) place.setAddress(dto.getAddress());
+    if (dto.getTags() != null) place.setTags(dto.getTags());
+    if (dto.getCategory() != null) place.setCategory(dto.getCategory());
+    if (dto.getRate() != null) place.setRate(dto.getRate());
+    if (dto.getPriceCategory() != null) place.setPriceCategory(dto.getPriceCategory());
+    if (dto.getAverageCheck() != null) place.setAverageCheck(dto.getAverageCheck());
+    if (dto.getDistrict() != null) place.setDistrict(dto.getDistrict());
+    if (dto.getWorkingHours() != null) place.setWorkingHours(dto.getWorkingHours());
+    if (dto.getWebsite() != null) place.setWebsite(dto.getWebsite());
+    if (dto.getSuitableFor() != null) place.setSuitableFor(dto.getSuitableFor());
+    if (dto.getTimeOfDay() != null) place.setTimeOfDay(dto.getTimeOfDay());
 
     return placeRepository.save(place);
   }

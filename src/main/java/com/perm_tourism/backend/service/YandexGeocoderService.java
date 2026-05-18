@@ -18,7 +18,7 @@ public class YandexGeocoderService {
   public PlaceDto getPlaceByAddress(String address) {
     // Формируем URL для запроса к Яндекс.Геокодеру
     String url = "https://geocode-maps.yandex.ru/1.x/?apikey=" + apiKey +
-        "&geocode=" + address + "&format=json";
+      "&geocode=" + address + "&format=json";
 
     // Отправляем запрос и получаем ответ в виде строки JSON
     String response = restTemplate.getForObject(url, String.class);
@@ -29,10 +29,10 @@ public class YandexGeocoderService {
 
       // Достаём первый найденный объект (самый релевантный)
       JsonNode geoObject = root.path("response")
-          .path("GeoObjectCollection")
-          .path("featureMember")
-          .get(0)
-          .path("GeoObject");
+        .path("GeoObjectCollection")
+        .path("featureMember")
+        .get(0)
+        .path("GeoObject");
 
       // Извлекаем данные
       String externalId = geoObject.path("id").asText();
@@ -40,8 +40,8 @@ public class YandexGeocoderService {
       String name = geoObject.path("name").asText();
       String description = geoObject.path("description").asText();
       String addressText = geoObject.path("boundedBy")
-          .path("Envelope")
-          .path("lowerCorner").asText();
+        .path("Envelope")
+        .path("lowerCorner").asText();
 
       // Координаты от Яндекса приходят как "долгота широта"
       String pos = geoObject.path("Point").path("pos").asText();

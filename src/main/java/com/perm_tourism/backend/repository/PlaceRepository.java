@@ -12,13 +12,13 @@ import java.util.List;
 @Repository
 public interface PlaceRepository extends JpaRepository<Place, Long> {
 
-    // Поиск по категории с сортировкой
-    List<Place> findByCategory(String category, Sort sort);
+  // Поиск по категории с сортировкой
+  List<Place> findByCategory(String category, Sort sort);
 
-    // Поиск по району с сортировкой
-    List<Place> findByDistrict(String district, Sort sort);
+  // Поиск по району с сортировкой
+  List<Place> findByDistrict(String district, Sort sort);
 
-    // Поиск по тегу (так как теги хранятся в коллекции)
-    @Query("SELECT p FROM Place p WHERE :tag MEMBER OF p.tags")
-    List<Place> findByTag(@Param("tag") String tag, Sort sort);
+  // Поиск по тегу (так как теги хранятся в коллекции)
+  @Query("SELECT p FROM Place p WHERE :tag MEMBER OF p.tags")
+  List<Place> findByTag(@Param("tag") String tag, Sort sort);
 }

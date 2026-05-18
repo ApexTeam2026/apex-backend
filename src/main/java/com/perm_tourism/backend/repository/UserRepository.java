@@ -8,8 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByEmail(String email); // Поиск пользователя по email
-    boolean existsByEmail(String email); // Проверка, существует ли пользователь с таким email
+  Optional<User> findByEmail(String email); // Поиск пользователя по email
+
+  boolean existsByEmail(String email); // Проверка, существует ли пользователь с таким email
 
   // Поиск только активных пользователей (не удалённых)
   Optional<User> findByUserIDAndDeletedAtIsNull(Long userID);
