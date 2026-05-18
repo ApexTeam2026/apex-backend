@@ -73,7 +73,7 @@ public class Place {
     @Column(name = "working_hours", length = 500)
     private String workingHours;
 
-    private String wedsite;
+    private String website;
 
     @ElementCollection
     @CollectionTable(name = "place_suitable_for", joinColumns = @JoinColumn(name = "place_id"))
