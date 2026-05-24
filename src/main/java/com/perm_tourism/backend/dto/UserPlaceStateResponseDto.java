@@ -14,4 +14,5 @@ public class UserPlaceStateResponseDto {
   private Boolean isFavorite;
   private Boolean isVisited;
   private LocalDateTime visitedAt;
+  private Integer rating;
 }

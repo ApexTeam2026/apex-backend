@@ -105,6 +105,34 @@ public class UserPlaceStateService {
     dto.setIsFavorite(state.getIsFavorite());
     dto.setIsVisited(state.getIsVisited());
     dto.setVisitedAt(state.getVisitedAt());
+    dto.setRating(state.getRating());
     return dto;
+  }
+
+  public UserPlaceStateResponseDto setRating(Long userId, Long placeId, Integer rating) {
+    if (rating == null || rating < 1 || rating > 5) {
+      throw new RuntimeException("Оценка должна быть от 1 до 5");
+    }
+
+    UserPlaceState state = stateRepository.findByUserUserIDAndPlacePlaceId(userId, placeId)
+      .orElse(new UserPlaceState());
+
+    if (state.getId() == null) {
+      User user = userRepository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+      Place place = placeRepository.findById(placeId)
+        .orElseThrow(() -> new RuntimeException("Место не найдено"));
+      state.setUser(user);
+      state.setPlace(place);
+    }
+
+    state.setRating(rating);
+
+    if (!Boolean.TRUE.equals(state.getIsVisited())) {
+      state.setIsVisited(true);
+      state.setVisitedAt(LocalDateTime.now());
+    }
+
+    return mapToResponseDto(stateRepository.save(state));
   }
 }

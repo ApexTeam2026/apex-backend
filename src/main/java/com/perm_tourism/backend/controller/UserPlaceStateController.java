@@ -38,4 +38,12 @@ public class UserPlaceStateController {
   public ResponseEntity<List<UserPlaceStateResponseDto>> getVisited(@PathVariable Long userId) {
     return ResponseEntity.ok(service.getUserVisited(userId));
   }
+
+  // Оценить место, автоматически отмечает место посещённым
+  @PostMapping("/rating")
+  public ResponseEntity<UserPlaceStateResponseDto> setRating(@RequestParam Long userId,
+                                                             @RequestParam Long placeId,
+                                                             @RequestParam Integer rating) {
+    return ResponseEntity.ok(service.setRating(userId, placeId, rating));
+  }
 }

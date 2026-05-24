@@ -38,4 +38,7 @@ public class UserPlaceState {
   @CreationTimestamp
   @Column(name = "visited_at")
   private LocalDateTime visitedAt;
+
+  @Column(name = "rating")
+  private Integer rating;
 }

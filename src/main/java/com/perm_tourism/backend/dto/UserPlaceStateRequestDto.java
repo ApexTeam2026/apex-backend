@@ -8,4 +8,5 @@ public class UserPlaceStateRequestDto {
   private Long placeId;
   private Boolean isFavorite;
   private Boolean isVisited;
+  private Integer rating;
 }
