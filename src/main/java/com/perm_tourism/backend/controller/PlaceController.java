@@ -1,6 +1,7 @@
 package com.perm_tourism.backend.controller;
 
 import com.perm_tourism.backend.dto.PlaceUpdateDto;
+import com.perm_tourism.backend.dto.QuizRequestDto;
 import com.perm_tourism.backend.model.Place;
 import com.perm_tourism.backend.service.PlaceService;
 import lombok.RequiredArgsConstructor;
@@ -71,5 +72,12 @@ public class PlaceController {
     } catch (RuntimeException e) {
       return ResponseEntity.notFound().build();
     }
+  }
+
+  // Опросник: по тегам вернуть ID мест
+  @PostMapping("/quiz")
+  public ResponseEntity<List<Long>> getPlaceIdsByQuiz(@RequestBody QuizRequestDto request) {
+    List<Long> placeIds = placeService.getPlaceIdsByTags(request.getTags());
+    return ResponseEntity.ok(placeIds);
   }
 }

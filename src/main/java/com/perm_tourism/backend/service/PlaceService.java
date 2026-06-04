@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -95,6 +96,25 @@ public class PlaceService {
       throw new RuntimeException("Place not found: " + id);
     }
     placeRepository.deleteById(id);
+  }
+
+  public List<Long> getPlaceIdsByTags(List<String> tags) {
+    if (tags == null || tags.isEmpty()) {
+      return List.of();
+    }
+
+    List<Place> places = placeRepository.findByTagsIn(tags);
+
+    // Сортируем: чем больше тегов совпало, тем выше место в списке
+    places.sort((p1, p2) -> {
+      long count1 = p1.getTags().stream().filter(tags::contains).count();
+      long count2 = p2.getTags().stream().filter(tags::contains).count();
+      return Long.compare(count2, count1); // по убыванию
+    });
+
+    return places.stream()
+      .map(Place::getPlaceId)
+      .collect(Collectors.toList());
   }
 }
 

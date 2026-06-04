@@ -18,7 +18,11 @@ public interface PlaceRepository extends JpaRepository<Place, Long> {
   // Поиск по району с сортировкой
   List<Place> findByDistrict(String district, Sort sort);
 
-  // Поиск по тегу (так как теги хранятся в коллекции)
+  // Поиск по тегу (все места, у которых в списке есть указанный тег)
   @Query("SELECT p FROM Place p WHERE :tag MEMBER OF p.tags")
   List<Place> findByTag(@Param("tag") String tag, Sort sort);
+
+  // Поиск по списку тегов (все места, у которых есть хотя бы один из переданных тегов)
+  @Query("SELECT DISTINCT p FROM Place p JOIN p.tags t WHERE t IN :tags")
+  List<Place> findByTagsIn(@Param("tags") List<String> tags);
 }
