@@ -77,7 +77,7 @@ public class PlaceController {
   // Опросник: по тегам вернуть ID мест
   @PostMapping("/quiz")
   public ResponseEntity<List<Long>> getPlaceIdsByQuiz(@RequestBody QuizRequestDto request) {
-    List<Long> placeIds = placeService.getPlaceIdsByTags(request.getTags());
+    List<Long> placeIds = placeService.getPlaceIdsByQuiz(request);
     return ResponseEntity.ok(placeIds);
   }
 }
