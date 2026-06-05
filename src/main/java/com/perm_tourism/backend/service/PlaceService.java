@@ -2,6 +2,7 @@ package com.perm_tourism.backend.service;
 
 import com.perm_tourism.backend.dto.PlaceDto;
 import com.perm_tourism.backend.dto.PlaceUpdateDto;
+import com.perm_tourism.backend.dto.QuizRequestDto;
 import com.perm_tourism.backend.model.Place;
 import com.perm_tourism.backend.repository.PlaceRepository;
 import lombok.RequiredArgsConstructor;
@@ -98,19 +99,48 @@ public class PlaceService {
     placeRepository.deleteById(id);
   }
 
-  public List<Long> getPlaceIdsByTags(List<String> tags) {
-    if (tags == null || tags.isEmpty()) {
-      return List.of();
+  public List<Long> getPlaceIdsByQuiz(QuizRequestDto request) {
+    List<String> tags = request.getTags();
+    List<String> suitableFor = request.getSuitableFor();
+    List<String> timeOfDay = request.getTimeOfDay();
+    List<String> priceCategory = request.getPriceCategory();
+
+    List<Place> places;
+    if (tags != null && !tags.isEmpty()) {
+      places = placeRepository.findByTagsIn(tags);
+    } else {
+      places = placeRepository.findAll();
     }
 
-    List<Place> places = placeRepository.findByTagsIn(tags);
+    if (suitableFor != null && !suitableFor.isEmpty() && !suitableFor.contains("any")) {
+      places = places.stream()
+        .filter(p -> p.getSuitableFor() != null &&
+          p.getSuitableFor().stream().anyMatch(suitableFor::contains))
+        .collect(Collectors.toList());
+    }
+
+    if (timeOfDay != null && !timeOfDay.isEmpty() && !timeOfDay.contains("any")) {
+      places = places.stream()
+        .filter(p -> p.getTimeOfDay() != null &&
+          p.getTimeOfDay().stream().anyMatch(timeOfDay::contains))
+        .collect(Collectors.toList());
+    }
+
+    if (priceCategory != null && !priceCategory.isEmpty() && !priceCategory.contains("any")) {
+      places = places.stream()
+        .filter(p -> p.getPriceCategory() != null &&
+          priceCategory.contains(p.getPriceCategory()))
+        .collect(Collectors.toList());
+    }
 
     // Сортируем: чем больше тегов совпало, тем выше место в списке
-    places.sort((p1, p2) -> {
-      long count1 = p1.getTags().stream().filter(tags::contains).count();
-      long count2 = p2.getTags().stream().filter(tags::contains).count();
-      return Long.compare(count2, count1); // по убыванию
-    });
+    if (tags != null && !tags.isEmpty()) {
+      places.sort((p1, p2) -> {
+        long c1 = p1.getTags().stream().filter(tags::contains).count();
+        long c2 = p2.getTags().stream().filter(tags::contains).count();
+        return Long.compare(c2, c1);
+      });
+    }
 
     return places.stream()
       .map(Place::getPlaceId)
