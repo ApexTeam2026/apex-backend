@@ -20,19 +20,58 @@ public class PlaceService {
   private final PlaceRepository placeRepository;
   private final YandexGeocoderService yandexGeocoderService;
 
-  public List<Place> getAllPlaces(String category, String tag, String district, String sortBy, String sortDir) {
-    Sort.Direction direction = Sort.Direction.fromString(sortDir);
-    Sort sort = Sort.by(direction, sortBy);
+  public List<Place> getAllPlaces(List<String> categories, List<String> districts,
+                                  Integer avgCheckMin, Integer avgCheckMax,
+                                  List<String> timeOfDay, List<String> suitableFor,
+                                  String sortBy, String sortDir) {
 
-    if (category != null && !category.isEmpty()) {
-      return placeRepository.findByCategory(category, sort);
-    } else if (tag != null && !tag.isEmpty()) {
-      return placeRepository.findByTag(tag, sort);
-    } else if (district != null && !district.isEmpty()) {
-      return placeRepository.findByDistrict(district, sort);
-    } else {
-      return placeRepository.findAll(sort);
+    Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortBy);
+    List<Place> places = placeRepository.findAll(sort);
+
+    // Фильтр по категориям
+    if (categories != null && !categories.isEmpty()) {
+      places = places.stream()
+        .filter(p -> categories.contains(p.getCategory()))
+        .collect(Collectors.toList());
     }
+
+    // Фильтр по районам
+    if (districts != null && !districts.isEmpty()) {
+      places = places.stream()
+        .filter(p -> p.getDistrict() != null && districts.contains(p.getDistrict()))
+        .collect(Collectors.toList());
+    }
+
+    // Фильтр по среднему чеку
+    if (avgCheckMin != null || avgCheckMax != null) {
+      places = places.stream()
+        .filter(p -> {
+          Integer check = p.getAverageCheck();
+          if (check == null) return false;
+          if (avgCheckMin != null && check < avgCheckMin) return false;
+          if (avgCheckMax != null && check > avgCheckMax) return false;
+          return true;
+        })
+        .collect(Collectors.toList());
+    }
+
+    // Фильтр по времени посещения
+    if (timeOfDay != null && !timeOfDay.isEmpty()) {
+      places = places.stream()
+        .filter(p -> p.getTimeOfDay() != null &&
+          p.getTimeOfDay().stream().anyMatch(timeOfDay::contains))
+        .collect(Collectors.toList());
+    }
+
+    // Фильтр по количеству людей
+    if (suitableFor != null && !suitableFor.isEmpty()) {
+      places = places.stream()
+        .filter(p -> p.getSuitableFor() != null &&
+          p.getSuitableFor().stream().anyMatch(suitableFor::contains))
+        .collect(Collectors.toList());
+    }
+
+    return places;
   }
 
   public Place getPlaceById(Long id) {

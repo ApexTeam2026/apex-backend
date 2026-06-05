@@ -20,13 +20,17 @@ public class PlaceController {
   // Получение всех мест (с фильтрацией и сортировкой)
   @GetMapping
   public ResponseEntity<List<Place>> getAllPlaces(
-    @RequestParam(required = false) String category,
-    @RequestParam(required = false) String tag,
-    @RequestParam(required = false) String district,
+    @RequestParam(required = false) List<String> categories,
+    @RequestParam(required = false) List<String> districts,
+    @RequestParam(required = false) Integer avgCheckMin,
+    @RequestParam(required = false) Integer avgCheckMax,
+    @RequestParam(required = false) List<String> timeOfDay,
+    @RequestParam(required = false) List<String> suitableFor,
     @RequestParam(defaultValue = "name") String sortBy,
     @RequestParam(defaultValue = "asc") String sortDir
   ) {
-    List<Place> places = placeService.getAllPlaces(category, tag, district, sortBy, sortDir);
+    List<Place> places = placeService.getAllPlaces(categories, districts,
+      avgCheckMin, avgCheckMax, timeOfDay, suitableFor, sortBy, sortDir);
     return ResponseEntity.ok(places);
   }
 
