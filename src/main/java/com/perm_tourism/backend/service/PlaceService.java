@@ -127,7 +127,7 @@ public class PlaceService {
     if (dto.getWebsite() != null) place.setWebsite(dto.getWebsite());
     if (dto.getSuitableFor() != null) place.setSuitableFor(dto.getSuitableFor());
     if (dto.getTimeOfDay() != null) place.setTimeOfDay(dto.getTimeOfDay());
-
+    if (dto.getPhotos() != null) place.setPhotos(dto.getPhotos());
     return placeRepository.save(place);
   }
 

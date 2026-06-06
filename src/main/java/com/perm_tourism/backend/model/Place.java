@@ -85,9 +85,6 @@ public class Place {
   @Column(name = "time")
   private List<String> timeOfDay; // Время суток
 
-//    @Column(name = "family_friendly")
-//    private Boolean familyFrinedly;
-
 
   // Ссылки на фотографии
   @Column(name = "photos", columnDefinition = "TEXT")

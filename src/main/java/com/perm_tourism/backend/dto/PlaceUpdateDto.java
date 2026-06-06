@@ -20,4 +20,5 @@ public class PlaceUpdateDto {
   private String website;
   private List<String> suitableFor;
   private List<String> timeOfDay;
+  private String photos;
 }
