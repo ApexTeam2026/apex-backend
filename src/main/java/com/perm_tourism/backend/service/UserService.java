@@ -4,19 +4,24 @@ import com.perm_tourism.backend.dto.LoginRequestDto;
 import com.perm_tourism.backend.dto.LoginResponseDto;
 import com.perm_tourism.backend.dto.UserRegistrationDto;
 import com.perm_tourism.backend.dto.UserResponseDto;
+
 import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-    UserResponseDto register(UserRegistrationDto dto); // Регистрация нового пользователя
+  UserResponseDto register(UserRegistrationDto dto); // Регистрация нового пользователя
 
-    Optional<UserResponseDto> getUserById(Long id); // Получить пользователя по ID
+  UserResponseDto getCurrentUser(String token); // Получить данные пользователя по токену
 
-    List<UserResponseDto> getAllUsers(); // Получить всех пользователей (для админа)
+  Optional<UserResponseDto> getUserById(Long id); // Получить пользователя по ID
 
-    Optional<UserResponseDto> updateUser(Long id, UserRegistrationDto dto); // Обновить данные пользователя
+  List<UserResponseDto> getAllUsers(); // Получить всех пользователей (для админа)
 
-    boolean deleteUser(Long id); // Удалить пользователя
+  Optional<UserResponseDto> updateUser(Long id, UserRegistrationDto dto); // Обновить данные пользователя
 
-    LoginResponseDto login(LoginRequestDto request);
+  boolean deleteUser(Long id); // Удалить пользователя
+
+  LoginResponseDto login(LoginRequestDto request); // Сгенерировать токен при входе в приложение
+
+  void changePassword(Long userId, String oldPassword, String newPassword); // Метод для смены пароля с подтверждением
 }

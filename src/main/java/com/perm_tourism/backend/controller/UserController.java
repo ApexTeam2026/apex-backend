@@ -10,54 +10,87 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserService userService;
+  private final UserService userService;
 
-    // Регистрация пользователя
-    @PostMapping("/register")
-    public ResponseEntity<UserResponseDto> register (@Valid @RequestBody UserRegistrationDto dto) {
-        try {
-            UserResponseDto registeredUser = userService.register(dto);
-            return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Пользователь с таким email уже существует
-        }
+  // Регистрация пользователя
+  @PostMapping("/register")
+  public ResponseEntity<?> register(@Valid @RequestBody UserRegistrationDto dto) {
+    try {
+      UserResponseDto registeredUser = userService.register(dto);
+      return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
+    } catch (RuntimeException e) {
+      return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); // Пользователь с таким email уже существует
     }
+  }
 
-    // Обновление данных пользователя
-    @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDto> updateUser(
-            @PathVariable Long id,
-            @Valid @RequestBody UserRegistrationDto dto) {
-        return userService.updateUser(id, dto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+  // Получение данных пользователя по токену
+  @GetMapping("/me")
+  public ResponseEntity<UserResponseDto> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+    try {
+      if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+      }
+      String token = authHeader.substring(7);
+      UserResponseDto user = userService.getCurrentUser(token);
+      return ResponseEntity.ok(user);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
+  }
 
-    // Получение пользователя по ID
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
-        return userService.getUserById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+  // Обновление данных пользователя
+  @PutMapping("/{id}")
+  public ResponseEntity<?> updateUser(
+    @PathVariable Long id,
+    @Valid @RequestBody UserRegistrationDto dto) {
+    try {
+      return userService.updateUser(id, dto)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+    } catch (RuntimeException e) {
+      return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
     }
+  }
 
-    // Получить всех пользователей
-    @GetMapping
-    public ResponseEntity<List<UserResponseDto>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+  // Смена пароля с подтверждением
+  @PostMapping("/change-password")
+  public ResponseEntity<Void> changePassword(@RequestParam Long userId,
+                                             @RequestParam String oldPassword,
+                                             @RequestParam String newPassword) {
+    try {
+      userService.changePassword(userId, oldPassword, newPassword);
+      return ResponseEntity.ok().build();
+    } catch (RuntimeException e) {
+      return ResponseEntity.badRequest().body(null);
     }
+  }
 
-    // Удаление пользователя (устанавливается deleteAt - пользователь помечается как удалённый)
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        if (userService.deleteUser(id)) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+  // Получение пользователя по ID
+  @GetMapping("/{id}")
+  public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
+    return userService.getUserById(id)
+      .map(ResponseEntity::ok)
+      .orElse(ResponseEntity.notFound().build());
+  }
+
+  // Получить всех пользователей
+  @GetMapping
+  public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+    return ResponseEntity.ok(userService.getAllUsers());
+  }
+
+  // Удаление пользователя (устанавливается deleteAt - пользователь помечается как удалённый)
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    if (userService.deleteUser(id)) {
+      return ResponseEntity.noContent().build();
     }
+    return ResponseEntity.notFound().build();
+  }
 }

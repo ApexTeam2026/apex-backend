@@ -20,93 +20,137 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final JwtUtil jwtUtil;
 
-    @Override
-    public UserResponseDto register(UserRegistrationDto dto) {
-        if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new RuntimeException("Пользователь с таким email уже существует");
+  @Override
+  public UserResponseDto register(UserRegistrationDto dto) {
+    if (userRepository.existsByEmail(dto.getEmail())) {
+      throw new RuntimeException("Пользователь с таким email уже существует");
+    }
+
+    User user = new User();
+    user.setName(dto.getName());
+    user.setEmail(dto.getEmail());
+    user.setPassword(passwordEncoder.encode(dto.getPassword()));
+    user.setBirthdayDate(dto.getBirthdayDate());
+    user.setCreatedAt(LocalDateTime.now());
+    user.setUpdatedAt(LocalDateTime.now());
+
+    User savedUser = userRepository.save(user);
+
+    return mapToResponseDto(savedUser);
+  }
+
+  @Override
+  public UserResponseDto getCurrentUser(String token) {
+    String email = jwtUtil.extractEmail(token);
+
+    User user = userRepository.findByEmailAndDeletedAtIsNull(email)
+      .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+    return mapToResponseDto(user);
+  }
+
+  @Override
+  public Optional<UserResponseDto> getUserById(Long id) {
+    // Ищем только активных пользователей (не удалённых)
+    return userRepository.findByUserIDAndDeletedAtIsNull(id)
+      .map(this::mapToResponseDto);
+  }
+
+  @Override
+  public List<UserResponseDto> getAllUsers() {
+    // Получаем только активных пользователей
+    return userRepository.findAllByDeletedAtIsNull().stream()
+      .map(this::mapToResponseDto)
+      .collect(Collectors.toList());
+  }
+
+  @Override
+  public Optional<UserResponseDto> updateUser(Long id, UserRegistrationDto dto) {
+    // Ищем только активного пользователя
+    return userRepository.findByUserIDAndDeletedAtIsNull(id)
+      .map(user -> {
+        // Обновляем имя (если передано)
+        if (dto.getName() != null && !dto.getName().isEmpty()) {
+          user.setName(dto.getName());
         }
 
-        User user = new User();
-        user.setName(dto.getName());
-        user.setEmail(dto.getEmail());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setBirthdayDate(dto.getBirthdayDate());
-        user.setCreatedAt(LocalDateTime.now());
+        // Обновляем email (с проверкой уникальности)
+        if (dto.getEmail() != null && !dto.getEmail().equals(user.getEmail())) {
+          if (userRepository.existsByEmailAndUserIDNot(dto.getEmail(), id)) {
+            throw new RuntimeException("Пользователь с таким email уже существует");
+          }
+          user.setEmail(dto.getEmail());
+        }
+
+        // Обновляем дату рождения (если передана)
+        if (dto.getBirthdayDate() != null) {
+          user.setBirthdayDate(dto.getBirthdayDate());
+        }
+
         user.setUpdatedAt(LocalDateTime.now());
 
-        User savedUser = userRepository.save(user);
+        return userRepository.save(user);
+      })
+      .map(this::mapToResponseDto);
+  }
 
-        return mapToResponseDto(savedUser);
-    }
-
-    @Override
-    public Optional<UserResponseDto> getUserById(Long id) {
-        return userRepository.findById(id)
-                .map(this::mapToResponseDto);
-    }
-
-    @Override
-    public List<UserResponseDto> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(this::mapToResponseDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Optional<UserResponseDto> updateUser(Long id, UserRegistrationDto dto) {
-        return userRepository.findById(id)
-                .map(user -> {
-                    user.setName(dto.getName());
-                    user.setEmail(dto.getEmail());
-                    user.setBirthdayDate(dto.getBirthdayDate());
-                    user.setUpdatedAt(LocalDateTime.now());
-                    // TODO: отдельный метод для смены пароля с подтверждением и хешированием
-                    return userRepository.save(user);
-                })
-                .map(this::mapToResponseDto);
-    }
-
-    @Override
-    public boolean deleteUser(Long id) {
-        return userRepository.findById(id)
-                .map(user -> {
-                    user.setDeletedAt(LocalDateTime.now());
-                    userRepository.save(user);
-                    return true;
-                })
-                .orElse(false);
-    }
-
-    @Override
-    public LoginResponseDto login(LoginRequestDto request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
-
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Неверный пароль");
-        }
-
-        String token = jwtUtil.generateToken(user.getEmail());
-
-        user.setAccessToken(token);
-        user.setAuthKey(token);
+  @Override
+  public boolean deleteUser(Long id) {
+    // Ищем только активного пользователя
+    return userRepository.findByUserIDAndDeletedAtIsNull(id)
+      .map(user -> {
+        user.setDeletedAt(LocalDateTime.now());
         userRepository.save(user);
+        return true;
+      })
+      .orElse(false);
+  }
 
-        return new LoginResponseDto(token, token);
+  @Override
+  public LoginResponseDto login(LoginRequestDto request) {
+    // При логине также проверяем, что пользователь не удалён
+    User user = userRepository.findByEmailAndDeletedAtIsNull(request.getEmail())
+      .orElseThrow(() -> new RuntimeException("Пользователь не найден или удалён"));
+
+    if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+      throw new RuntimeException("Неверный пароль");
     }
 
-    // Преобразование User -> UserResponseDto
-    private UserResponseDto mapToResponseDto(User user) {
-        UserResponseDto dto = new UserResponseDto();
-        dto.setUserID(user.getUserID());
-        dto.setName(user.getName());
-        dto.setEmail(user.getEmail());
-        dto.setBirthdayDate(user.getBirthdayDate());
-        // TODO: добавить avatarUrl
-        return dto;
+    String token = jwtUtil.generateToken(user.getEmail());
+
+    user.setAccessToken(token);
+    user.setAuthKey(token);
+    userRepository.save(user);
+
+    return new LoginResponseDto(token, token);
+  }
+
+  @Override
+  public void changePassword(Long userId, String oldPassword, String newPassword) {
+    User user = userRepository.findById(userId)
+      .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+    if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+      throw new RuntimeException("Неверный старый пароль");
     }
+
+    user.setPassword(passwordEncoder.encode(newPassword));
+    user.setUpdatedAt(LocalDateTime.now());
+    userRepository.save(user);
+  }
+
+  // Преобразование User -> UserResponseDto
+  private UserResponseDto mapToResponseDto(User user) {
+    UserResponseDto dto = new UserResponseDto();
+    dto.setUserID(user.getUserID());
+    dto.setName(user.getName());
+    dto.setEmail(user.getEmail());
+    dto.setBirthdayDate(user.getBirthdayDate());
+    dto.setAvatarUrl(user.getAvatarUrl());
+    return dto;
+  }
 }

@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/test")
 public class TestController {
 
-    @GetMapping("/hello")
-    public String hello() {
-        return "Привет от бэкенда туристического приложения!";
-    }
+  @GetMapping("/hello")
+  public String hello() {
+    return "Привет от бэкенда туристического приложения!";
+  }
 
-    @GetMapping("/health")
-    public String health() {
-        return "OK";
-    }
+  @GetMapping("/health")
+  public String health() {
+    return "OK";
+  }
 }
